@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/api';
+import { API_URL } from './config.js';
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -108,7 +108,7 @@ categoryModal.addEventListener('click', (e) => {
 async function fetchCategories() {
     try {
         const res = await fetch(`${API_URL}/categories`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
         });
         if (res.ok) {
             currentCategories = await res.json() || [];
@@ -134,7 +134,7 @@ function updateCategoryDropdown() {
 async function fetchTasks() {
     try {
         const res = await fetch(`${API_URL}/tasks`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
         });
 
         if (res.status === 401) {
@@ -291,14 +291,15 @@ window.completeCheckpoint = async function (taskId, cpId, targetStatus) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ completed: targetStatus })
         });
 
         if (res.ok) {
             // Get original tasks to check if we just completed the 4th checkpoint
-            const resTasks = await fetch(`${API_URL}/tasks`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const resTasks = await fetch(`${API_URL}/tasks`, { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } });
             const tasksData = await resTasks.json();
             const task = tasksData.find(t => t.id === taskId);
 
@@ -452,7 +453,8 @@ newTaskForm.addEventListener('submit', async (e) => {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 title, description, deadline, checkpoints, category_id
@@ -490,7 +492,8 @@ newCategoryForm.addEventListener('submit', async (e) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ name })
         });

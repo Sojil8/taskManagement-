@@ -20,25 +20,11 @@ func SetupRouter(authHandler *handler.AuthHandler, taskHandler *handler.TaskHand
 	// Add Logs Recovery middleware to handle panics safely
 	r.Use(ginzap.RecoveryWithZap(logger.Log, true))
 
+	// Add Custom Middleware
 	r.Use(middleware.CORSMiddleware())
+	r.Use(middleware.SecurityHeadersMiddleware())
 
-	r.Static("/css", "../frontend/css")
-	r.Static("/js", "../frontend/js")
-
-	// Apply frontend redirection middleware
-	frontendRoutes := r.Group("/")
-	frontendRoutes.Use(middleware.AuthRedirectMiddleware(jwtSecret))
-	{
-		frontendRoutes.StaticFile("/", "../frontend/index.html")
-		frontendRoutes.StaticFile("/index.html", "../frontend/index.html")
-		frontendRoutes.StaticFile("/login.html", "../frontend/login.html")
-		frontendRoutes.StaticFile("/signup.html", "../frontend/signup.html")
-		frontendRoutes.StaticFile("/otp.html", "../frontend/otp.html")
-		frontendRoutes.StaticFile("/dashboard.html", "../frontend/dashboard.html")
-		frontendRoutes.StaticFile("/pomodoro.html", "../frontend/pomodoro.html")
-	}
-
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
 
 	auth := api.Group("/auth")
 	{

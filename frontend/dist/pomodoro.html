@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Clock - TaskTracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Protect route
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+  <script type="module" crossorigin src="/assets/pomodoro-B1AeWIh6.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/styles-DDzRsouP.js">
+  <link rel="stylesheet" crossorigin href="/assets/styles-CuQ2A1a1.css">
+  <link rel="stylesheet" crossorigin href="/assets/pomodoro-C-uIorpN.css">
+</head>
+
+<body class="dashboard-page">
+    <nav class="navbar glass-panel">
+        <div class="nav-brand">
+            <div class="logo-icon"></div>
+            <span>TaskTracker</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="pomodoro.html" class="nav-link active">Pomodoro</a>
+        </div>
+        <div class="nav-actions">
+            <button id="logoutBtn" class="btn btn-outline btn-sm">Logout</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container pomodoro-container">
+        <header class="dashboard-header pomodoro-header">
+            <div>
+                <h1>Pomodoro Timer</h1>
+                <p>Stay focused and remember to take breaks.</p>
+            </div>
+            <button id="openSettingsModalBtn" class="btn btn-outline">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+                Settings
+            </button>
+        </header>
+
+        <div class="pomodoro-layout">
+            <div class="timer-section glass-card">
+                <div class="cycle-indicator" id="cycleStatus">
+                    Cycle <span id="currentCycle">1</span> of <span id="totalCycles">4</span>
+                </div>
+
+                <div class="session-type" id="sessionTypeIndicator">Focus</div>
+
+                <div class="timer-display-wrapper">
+                    <svg class="progress-ring" width="280" height="280">
+                        <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="12"
+                            fill="transparent" r="120" cx="140" cy="140" />
+                        <circle class="progress-ring__circle" id="timeProgress" stroke="var(--primary)"
+                            stroke-width="12" fill="transparent" r="120" cx="140" cy="140" stroke-linecap="round" />
+                    </svg>
+                    <div class="time-readout" id="timeDisplay">25:00</div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-outline" id="resetBtn">Reset</button>
+                    <button class="btn btn-primary btn-lg" id="startPauseBtn">Start</button>
+                    <button class="btn btn-outline" id="skipSessionBtn" title="Skip Session">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 4l10 8-10 8V4z"></path>
+                            <line x1="19" y1="5" x2="19" y2="19"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="activity-section glass-card scale-in" id="breakActivityCard" style="display: none;">
+                <div class="activity-header">
+                    <h2>Break Activity</h2>
+                    <span class="badge badge-success">Recommended</span>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <h3 id="activityTitle">10 Push-ups</h3>
+                    <p id="activityDesc">Get up and do 10 push-ups to keep your blood flowing.</p>
+                </div>
+                <div class="activity-actions">
+                    <button class="btn btn-outline btn-block" id="newActivityBtn">Get Another Activity</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-card scale-in">
+            <div class="modal-header">
+                <h2>Timer Settings</h2>
+                <button id="closeSettingsBtn" class="close-btn">&times;</button>
+            </div>
+
+            <form id="settingsForm" class="modal-form">
+                <div class="form-section-title">Durations (in minutes)</div>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="focusDuration">Focus</label>
+                        <input type="number" id="focusDuration" required min="1" max="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="shortBreakDuration">Short Break</label>
+                        <input type="number" id="shortBreakDuration" required min="1" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label for="longBreakDuration">Long Break</label>
+                        <input type="number" id="longBreakDuration" required min="1" max="120">
+                    </div>
+                </div>
+
+                <div class="form-section-title">Cycles</div>
+                <div class="form-group">
+                    <label for="cyclesCount">Cycles before Long Break</label>
+                    <input type="number" id="cyclesCount" required min="1" max="10">
+                </div>
+
+                <div class="modal-actions mt-2">
+                    <button type="button" id="cancelSettingsBtn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

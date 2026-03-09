@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/api';
+import { API_URL } from './config.js';
 
 // Utility to show errors
 function showError(msg) {
@@ -49,7 +49,7 @@ if (signupForm) {
             // 1. Register User
             let res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ name, email, password })
             });
             const data = await res.json();
@@ -59,7 +59,7 @@ if (signupForm) {
             // 2. Send OTP
             res = await fetch(`${API_URL}/auth/send-otp`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ email })
             });
             const otpData = await res.json();
@@ -120,7 +120,7 @@ if (otpForm) {
         try {
             const res = await fetch(`${API_URL}/auth/verify-otp`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ email: tempEmail, code })
             });
             const data = await res.json();
@@ -145,7 +145,7 @@ if (otpForm) {
         try {
             const res = await fetch(`${API_URL}/auth/send-otp`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ email: tempEmail })
             });
             if (res.ok) {
@@ -175,7 +175,7 @@ if (loginForm) {
         try {
             const res = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
             const data = await res.json();
