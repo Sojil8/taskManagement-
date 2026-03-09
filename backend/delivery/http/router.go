@@ -1,14 +1,25 @@
 package http
 
 import (
+	"time"
+
 	"taskmanager/delivery/http/handler"
 	"taskmanager/delivery/http/middleware"
+	"taskmanager/infrastructure/logger"
 
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(authHandler *handler.AuthHandler, taskHandler *handler.TaskHandler, categoryHandler *handler.CategoryHandler, jwtSecret string) *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
+
+	// Add Zap Logger middleware
+	r.Use(ginzap.Ginzap(logger.Log, time.RFC3339, true))
+
+	// Add Logs Recovery middleware to handle panics safely
+	r.Use(ginzap.RecoveryWithZap(logger.Log, true))
+
 	r.Use(middleware.CORSMiddleware())
 
 	r.Static("/css", "../frontend/css")

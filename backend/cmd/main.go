@@ -3,39 +3,51 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	"taskmanager/delivery/http"
 	"taskmanager/delivery/http/handler"
 	"taskmanager/infrastructure/email"
+	"taskmanager/infrastructure/logger"
 	"taskmanager/infrastructure/postgres"
+	"taskmanager/migrations"
 	"taskmanager/usecase"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 func main() {
+	// Initialize global Zap logger
+	logger.InitLogger()
+	defer logger.Sync()
+
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, relying on environment variables")
+		logger.Log.Info("No .env file found, relying on environment variables")
 	}
 
 	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
-		log.Fatal("DB_URL environment variable is required")
+		logger.Log.Fatal("DB_URL environment variable is required")
 	}
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		logger.Log.Fatal("Failed to connect to database", zap.Error(err))
 	}
 	defer db.Close()
 
 	if err := db.Ping(); err != nil {
-		log.Fatalf("Database unreachable: %v", err)
+		logger.Log.Fatal("Database unreachable", zap.Error(err))
 	}
-	log.Println("Connected to PostgreSQL successfully")
+	logger.Log.Info("Connected to PostgreSQL successfully")
+
+	// Run Database Migrations Automatically
+	logger.Log.Info("Checking and running database migrations...")
+	if err := migrations.RunAutoMigrations(db, "migrations"); err != nil {
+		logger.Log.Fatal("Database migrations failed", zap.Error(err))
+	}
 
 	// Email Config
 	smtpHost := os.Getenv("SMTP_HOST")
@@ -46,7 +58,7 @@ func main() {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		jwtSecret = "default_secret_key"
-		log.Println("Warning: JWT_SECRET not set, using default")
+		logger.Log.Warn("JWT_SECRET not set, using default")
 	}
 
 	// Init Repositories
@@ -76,8 +88,8 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server starting on port %s", port)
+	logger.Log.Info("Server starting", zap.String("port", port))
 	if err := r.Run(fmt.Sprintf(":%s", port)); err != nil {
-		log.Fatalf("Server failed: %v", err)
+		logger.Log.Fatal("Server failed", zap.Error(err))
 	}
 }

@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -109,14 +110,30 @@ func AuthRedirectMiddleware(secret string) gin.HandlerFunc {
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		if origin != "" {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+		allowedOrigins := strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
+		
+		isAllowed := false
+		if os.Getenv("ALLOWED_ORIGINS") == "" || os.Getenv("ALLOWED_ORIGINS") == "*" {
+			isAllowed = true
 		} else {
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+			for _, allowedOrigin := range allowedOrigins {
+				if origin == strings.TrimSpace(allowedOrigin) {
+					isAllowed = true
+					break
+				}
+			}
 		}
+
+		if isAllowed && origin != "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+		} else if isAllowed {
+		    c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
