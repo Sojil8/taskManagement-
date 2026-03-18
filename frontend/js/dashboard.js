@@ -251,10 +251,10 @@ function renderTasks(tasks) {
         return `
             <div class="task-card glass-card scale-in ${celebrateClass}">
                 <div class="task-header">
-                    <div style="flex: 1; padding-right: 1rem;">
+                    <div style="flex: 1; padding-right: 1rem; cursor: pointer;" onclick="viewTaskDetails(${task.id})">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div class="task-title">${task.title}</div>
-                            <div style="display: flex; gap: 0.5rem;">
+                            <div style="display: flex; gap: 0.5rem;" onclick="event.stopPropagation()">
                                 <button class="btn-edit" title="Edit Task" onclick="editTask(${task.id})" style="background:transparent; border:none; cursor:pointer; color: var(--primary-color);">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                 </button>
@@ -385,6 +385,65 @@ confirmDeleteBtn.addEventListener('click', async () => {
 
 window.deleteTask = function (taskId) {
     openDeleteModal(taskId);
+}
+
+// Task Details Modal Logic
+const taskDetailsModal = document.getElementById('taskDetailsModal');
+const closeDetailsModalBtn = document.getElementById('closeDetailsModalBtn');
+
+function closeDetailsModal() {
+    taskDetailsModal.style.display = 'none';
+}
+
+closeDetailsModalBtn.addEventListener('click', closeDetailsModal);
+taskDetailsModal.addEventListener('click', (e) => {
+    if (e.target === taskDetailsModal) closeDetailsModal();
+});
+
+window.viewTaskDetails = function(taskId) {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    document.getElementById('detailsTitle').textContent = task.title;
+    document.getElementById('detailsDescription').textContent = task.description || 'No description provided.';
+    
+    // Total and completed checkpoints
+    const total = task.checkpoints ? task.checkpoints.length : 4;
+    const completed = task.checkpoints ? task.checkpoints.filter(cp => cp.completed).length : 0;
+    const percentage = Math.round((completed / total) * 100);
+    const isTaskCompleted = task.status === 'Completed';
+
+    let badgesHtml = '';
+    if (task.category) {
+        badgesHtml += `<span class="badge" style="background: rgba(124, 58, 237, 0.1); color: var(--primary-color); border: 1px solid rgba(124, 58, 237, 0.2);">${task.category.name}</span>`;
+    }
+    badgesHtml += `
+        <span class="badge badge-deadline">${formatDate(task.deadline)}</span>
+        <span class="badge badge-progress">${completed}/${total} (${percentage}%)</span>
+        <span class="badge badge-status ${isTaskCompleted ? 'status-completed' : ''}">${task.status}</span>
+    `;
+    document.getElementById('detailsBadges').innerHTML = badgesHtml;
+
+    let checkpointsHtml = '';
+    if (task.checkpoints) {
+        checkpointsHtml = task.checkpoints.map(cp => {
+            return `
+                <div style="display: flex; align-items: flex-start; gap: 1rem; padding-bottom: 0.5rem; ${!cp.completed ? 'opacity: 0.7;' : ''}">
+                    <div style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: ${cp.completed ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}; color: ${cp.completed ? '#fff' : 'var(--text-muted)'}; font-size: 0.8rem;">
+                        ${cp.completed ? '✓' : cp.order}
+                    </div>
+                    <div style="color: ${cp.completed ? 'var(--text-main)' : 'var(--text-muted)'}; line-height: 1.4;">
+                        ${cp.title}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        checkpointsHtml = '<div style="color: var(--text-muted);">No checkpoints</div>';
+    }
+    document.getElementById('detailsCheckpoints').innerHTML = checkpointsHtml;
+
+    taskDetailsModal.style.display = 'flex';
 }
 
 // Edit Task
