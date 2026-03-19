@@ -22,20 +22,22 @@ func SetupRouter(authHandler *handler.AuthHandler, taskHandler *handler.TaskHand
 
 	r.Use(middleware.CORSMiddleware())
 
-	r.Static("/css", "../frontend/css")
-	r.Static("/js", "../frontend/js")
+	r.Static("/css", "template/css")
+	r.Static("/js", "template/js")
+
+	r.LoadHTMLGlob("template/*.html")
 
 	// Apply frontend redirection middleware
 	frontendRoutes := r.Group("/")
 	frontendRoutes.Use(middleware.AuthRedirectMiddleware(jwtSecret))
 	{
-		frontendRoutes.StaticFile("/", "../frontend/index.html")
-		frontendRoutes.StaticFile("/index.html", "../frontend/index.html")
-		frontendRoutes.StaticFile("/login.html", "../frontend/login.html")
-		frontendRoutes.StaticFile("/signup.html", "../frontend/signup.html")
-		frontendRoutes.StaticFile("/otp.html", "../frontend/otp.html")
-		frontendRoutes.StaticFile("/dashboard.html", "../frontend/dashboard.html")
-		frontendRoutes.StaticFile("/pomodoro.html", "../frontend/pomodoro.html")
+		frontendRoutes.GET("/", func(c *gin.Context) { c.HTML(200, "index.html", gin.H{}) })
+		frontendRoutes.GET("/index.html", func(c *gin.Context) { c.HTML(200, "index.html", gin.H{}) })
+		frontendRoutes.GET("/login.html", func(c *gin.Context) { c.HTML(200, "login.html", gin.H{}) })
+		frontendRoutes.GET("/signup.html", func(c *gin.Context) { c.HTML(200, "signup.html", gin.H{}) })
+		frontendRoutes.GET("/otp.html", func(c *gin.Context) { c.HTML(200, "otp.html", gin.H{}) })
+		frontendRoutes.GET("/dashboard.html", func(c *gin.Context) { c.HTML(200, "dashboard.html", gin.H{}) })
+		frontendRoutes.GET("/pomodoro.html", func(c *gin.Context) { c.HTML(200, "pomodoro.html", gin.H{}) })
 	}
 
 	api := r.Group("/api")
